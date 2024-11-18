@@ -1,149 +1,167 @@
-# My Vue.js Project with CI/CD Setup
+# Nuxt Project with CI/CD and Unit Testing Setup
 
-This project demonstrates a basic Vue.js application with a CI/CD pipeline setup using GitHub Actions. The pipeline includes steps to install dependencies, build the project, and deploy it to GitHub Pages.
+This project is a Nuxt.js application that uses GitHub Actions for CI/CD and includes unit testing setup. The project follows a series of steps for setting up the project environment, creating a simple page, configuring unit tests, and automating test runs on each commit.
 
-## Project Setup
+## Prerequisites
 
-### Step 1: Create a Vue.js Project
+- [Node.js](https://nodejs.org/) installed
+- [npm](https://www.npmjs.com/) installed
+- GitHub repository for hosting and GitHub Actions setup
 
-To create a new Vue.js project, you need to have Node.js and Vue CLI installed.
+## Steps
 
-1. Install Vue CLI (if not already installed):
+### 1. Initialize the Nuxt Project
 
-   ```bash
-   npm install -g @vue/cli
-   ```
-
-2. Create a new Vue project:
-
-   ```bash
-   vue create my-vue-project
-   ```
-
-3. Navigate to the project directory:
-
-   ```bash
-   cd my-vue-project
-   ```
-
-### Step 2: Set Up GitHub Actions for CI/CD
-
-To enable CI/CD for this project, we'll use GitHub Actions to automate testing and deployment.
-
-1. Create the `.github/workflows` directory if it does not exist:
-
-   ```bash
-   mkdir -p .github/workflows
-   ```
-
-2. Create a new file `ci-cd.yml` in `.github/workflows` with the following content:
-
-   ```yaml
-   name: CI/CD for Vue.js
-
-   on:
-     push:
-       branches:
-         - main
-     pull_request:
-       branches:
-         - main
-
-   jobs:
-     build:
-       runs-on: ubuntu-latest
-
-       steps:
-         - name: Checkout repository
-           uses: actions/checkout@v3
-
-         - name: Set up Node.js
-           uses: actions/setup-node@v3
-           with:
-             node-version: '18' # Specify Node.js version as needed
-
-         - name: Install dependencies
-           run: npm install
-
-         - name: Build project
-           run: npm run build
-
-         - name: Upload artifact
-           uses: actions/upload-artifact@v3
-           with:
-             name: build
-             path: dist/ # Ensure this matches the Vue.js build output
-
-     deploy:
-       runs-on: ubuntu-latest
-       needs: build
-       steps:
-         - name: Download artifact
-           uses: actions/download-artifact@v3
-           with:
-             name: build
-             path: output
-
-         - name: Deploy to GitHub Pages
-           uses: peaceiris/actions-gh-pages@v3
-           with:
-             github_token: ${{ secrets.GITHUB_TOKEN }}
-             publish_dir: ./output
-   ```
-
-### Step 3: Configure `GITHUB_TOKEN` and Custom Secrets
-
-GitHub provides a `GITHUB_TOKEN` secret by default for each GitHub Actions workflow, which allows it to interact with the repository securely.
-
-1. The `GITHUB_TOKEN` is used here to authorize deployments to GitHub Pages.
-2. If additional secrets are needed (e.g., for external API keys), they can be added:
-   - Go to **Settings** > **Secrets and variables** > **Actions** in the repository.
-   - Click **New repository secret** and add the name and value of your secret.
-   
-   For example:
-   
-   - **Name**: `API_KEY`
-   - **Value**: `your-api-key-value`
-
-   Use `${{ secrets.API_KEY }}` to access this secret in your workflow.
-
-### Step 4: Commit and Push to Trigger the Workflow
-
-After configuring the CI/CD file, commit and push changes to the repository:
+The project was initialized following the instructions from the [Nuxt documentation](https://nuxt.com/docs/api/commands/init). Basic setup commands:
 
 ```bash
-git add .
-git commit -m "Add CI/CD configuration with GitHub Actions"
-git push origin main
+npx nuxi init nuxt-app
+cd nuxt-app
+npm install
 ```
 
-This will automatically trigger the GitHub Actions workflow, which will:
-- Install dependencies
-- Build the project
-- Upload the build artifact
-- Deploy to GitHub Pages
+### 2. Set Up CI/CD with GitHub Actions
 
-### Workflow Details
+We created a `.github/workflows/ci.yml` file to automate the build and test process for each commit:
 
-The workflow is divided into two main jobs:
+```yaml
+name: CI/CD Pipeline
 
-1. **Build Job**:
-   - Installs dependencies
-   - Builds the Vue.js project
-   - Uploads the build artifact to GitHub Actions for use in later steps
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-2. **Deploy Job**:
-   - Downloads the build artifact
-   - Deploys the built files to GitHub Pages using `peaceiris/actions-gh-pages`
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-### Troubleshooting
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-- **Artifact Not Found**: Ensure that the `path` in `upload-artifact` points to the correct build directory (usually `dist` for Vue.js).
-- **No Deployment**: Ensure `GITHUB_TOKEN` is set with the correct permissions in **Settings** > **Actions** > **General** > **Workflow permissions**.
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
-## License
+      - name: Install dependencies
+        run: npm install
 
-This project is licensed under the MIT License.
+      - name: Run build
+        run: npm run build
+
+      - name: Run tests
+        run: npm run test
 ```
 
-Hãy thay thế `"your-api-key-value"` bằng giá trị thực tế của bạn nếu cần. File README này cung cấp các hướng dẫn từ việc tạo project Vue.js đến thiết lập CI/CD với GitHub Actions, giúp người dùng dễ dàng triển khai code lên GitHub Pages.
+### 3. Create a Simple Page Component
+
+We created a simple page component (`pages/hello.vue`) with basic content for testing:
+
+```html
+<template>
+  <div>
+    <h1>Hello, Nuxt.js!</h1>
+    <p>This is a simple test page.</p>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'HelloPage',
+};
+</script>
+
+<style scoped>
+h1 {
+  color: #333;
+}
+</style>
+```
+
+### 4. Set Up Unit Testing
+
+We installed `Vitest` for unit testing and configured it in `vite.config.ts` as follows:
+
+```bash
+npm install --save-dev vitest @vitejs/plugin-vue
+```
+
+Updated `vite.config.ts`:
+
+```typescript
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+
+export default defineConfig({
+  plugins: [vue()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+  },
+});
+```
+
+### 5. Create a Unit Test for the Page Component
+
+A simple unit test was created for the `HelloPage` component in `tests/pages/hello.spec.js`:
+
+```javascript
+import { mount } from '@vue/test-utils';
+import HelloPage from '../../pages/hello.vue';
+
+describe('HelloPage', () => {
+  it('renders correctly', () => {
+    const wrapper = mount(HelloPage);
+    expect(wrapper.text()).toContain('Hello, Nuxt.js!');
+  });
+});
+```
+
+### 6. Configure GitHub Actions to Run Tests
+
+We updated the GitHub Actions configuration to run tests as part of the CI pipeline (in `.github/workflows/ci.yml`):
+
+```yaml
+- name: Run tests
+  run: npm run test
+```
+
+### 7. Fix Dependency Conflicts
+
+During setup, a few dependency conflicts were resolved:
+
+- **Vite Plugin Configuration**: Installed `@vitejs/plugin-vue` to handle `.vue` files.
+- **Jest Configuration (Optional)**: Configured Jest with `vue-jest` and `babel-jest` if Jest is used instead of Vitest.
+
+### Known Issues and Troubleshooting
+
+- **Error: `describe` is not defined**: This was fixed by setting `globals: true` in the Vitest configuration within `vite.config.ts`.
+- **Failed to parse `.vue` files**: Solved by installing `@vitejs/plugin-vue` and configuring it in `vite.config.ts`.
+
+## Usage
+
+To start the development server:
+
+```bash
+npm run dev
+```
+
+To run unit tests:
+
+```bash
+npm run test
+```
+
+To trigger the CI/CD pipeline, push changes to the `main` branch or open a pull request targeting the `main` branch.
+
+## Conclusion
+
+This project demonstrates the setup of a basic Nuxt.js project with GitHub Actions for CI/CD and automated unit testing with Vitest. The pipeline is configured to build the project and run tests on each commit, ensuring code quality and functionality.
+
+### Lưu ý
+File `README.md` này bao gồm các bước từ việc khởi tạo dự án, cấu hình CI/CD, thiết lập unit test, đến cách xử lý một số lỗi đã gặp.
