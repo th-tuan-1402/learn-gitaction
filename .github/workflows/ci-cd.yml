@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build
-          path: .output/
+          path: ./.output/
 
   deploy:
     runs-on: ubuntu-latest
@@ -42,7 +42,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build
-          path: .output
+          path: ./.output
 
       # Tuỳ chọn deploy lên GitHub Pages
       - name: Deploy to GitHub Pages
