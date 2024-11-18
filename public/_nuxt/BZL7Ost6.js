@@ -1,0 +1,1 @@
+import{_ as t,v as l,x as o,y as s}from"./aztUZ8m2.js";const a={name:"HelloPage"};function n(r,e,p,c,i,u){return l(),o("div",null,e[0]||(e[0]=[s("h1",null,"Hello, Nuxt.js!",-1),s("p",null,"This is a simple test page.",-1)]))}const d=t(a,[["render",n]]);export{d as default};
